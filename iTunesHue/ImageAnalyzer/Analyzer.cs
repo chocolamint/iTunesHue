@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ImageAnalyzer
 {
@@ -31,8 +33,13 @@ namespace ImageAnalyzer
             {
                 return mainColor;
             }
-            var allPixels = bitmap.GetPixels().ToArray();
-            if (allPixels.Count(x => subColor.IsNearly(x)) / (float)allPixels.Count() < 0.05)
+
+            var allPixels = EnumerateColors(bitmap, (width, height) =>
+                from y in Enumerable.Range(0, height)
+                from x in Enumerable.Range(0, width)
+                select new Point(x, y)).ToArray();
+
+            if (allPixels.Count(x => subColor.IsNearly(x)) / (float)allPixels.Length < 0.05)
             {
                 return mainColor;
             }
@@ -40,21 +47,64 @@ namespace ImageAnalyzer
         }
         private static Color FindEdgeColor(Bitmap bitmap, Func<Color, bool> filter = null)
         {
-            var colors = from x in Enumerable.Range(0, bitmap.Width)
-                         from y in Enumerable.Range(0, bitmap.Height)
-                         where x == 0 || x == bitmap.Width || y == 0 || y == bitmap.Height
-                         select bitmap.GetPixel(x, y);
+            var colors = EnumerateColors(bitmap, (width, height) =>
+                from y in Enumerable.Range(0, height)
+                from x in Enumerable.Range(0, width)
+                where x == 0 || x == bitmap.Width || y == 0 || y == bitmap.Height
+                select new Point(x, y));
 
             return FindColor(colors, filter);
         }
         private static Color FindBackgroundColor(Bitmap bitmap, Func<Color, bool> filter = null)
         {
-            var colors = from x in Enumerable.Range(1, bitmap.Width - 2)
-                         from y in Enumerable.Range(1, bitmap.Height - 2)
-                         select bitmap.GetPixel(x, y);
+            var colors = EnumerateColors(bitmap, (width, height) =>
+                from y in Enumerable.Range(1, bitmap.Height - 2)
+                from x in Enumerable.Range(1, bitmap.Width - 2)
+                select new Point(x, y));
 
             return FindColor(colors, filter);
         }
+        private static IEnumerable<Color> EnumerateColors(Bitmap bitmap, Func<int, int, IEnumerable<Point>> pointsSelector)
+        {
+            // Bitmap.Width と Bitmap.Height の取得は遅いためローカル変数に退避
+            var width = bitmap.Width;
+            var height = bitmap.Height;
+            var rect = new Rectangle(0, 0, width, height);
+            var bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            try
+            {
+                var unit = bitmapData.Stride / width;
+                var bytes = new byte[bitmapData.Stride * height];
+                Marshal.Copy(bitmapData.Scan0, bytes, 0, bytes.Length);
+
+                // 呼び出し元が Bitmap.Width, Bitmap.Height にアクセスしなくて済むように Func<int, int, IEnumerable<Point>> を使う
+                var colors = from point in pointsSelector(width, height)
+                             let x = point.X
+                             let y = point.Y
+                             let position = x * unit + bitmapData.Stride * y
+                             let b = bytes[position + 0]
+                             let g = bytes[position + 1]
+                             let r = bytes[position + 2]
+                             let color = Color.FromArgb(r, g, b)
+                             select color;
+
+                foreach (var color in colors)
+                {
+                    yield return color;
+                }
+            }
+            finally
+            {
+                bitmap.UnlockBits(bitmapData);
+            }
+        }
+
+        /// <summary>
+        /// <paramref name="filter"/> を満たす中で最も多く使用されている色を取得します。
+        /// </summary>
+        /// <param name="colors"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         private static Color FindColor(IEnumerable<Color> colors, Func<Color, bool> filter = null)
         {
             var array = colors.ToArray();
@@ -118,12 +168,6 @@ namespace ImageAnalyzer
             return (diff < 180f) ? diff : (360f - diff);
         }
 
-        private static IEnumerable<Color> GetPixels(this Bitmap bitmap)
-        {
-            return from x in Enumerable.Range(0, bitmap.Width)
-                   from y in Enumerable.Range(0, bitmap.Height)
-                   select bitmap.GetPixel(x, y);
-        }
         private class ColorNearlyComparer : IEqualityComparer<Color>
         {
             public bool Equals(Color x, Color y)
