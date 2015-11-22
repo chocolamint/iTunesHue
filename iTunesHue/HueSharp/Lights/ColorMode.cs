@@ -1,4 +1,6 @@
 ﻿using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace HueSharp.Lights
 {
@@ -6,22 +8,23 @@ namespace HueSharp.Lights
     /// Indicates the color mode in which the light is working.
     /// </summary>
     [DataContract]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum ColorMode
     {
         /// <summary>
         /// Hue and saturation.
         /// </summary>
-        [DataMember(Name = "hs")]
+        [EnumMember(Value = "hs")]
         HueSaturation,
         /// <summary>
         /// CIE color space.
         /// </summary>
-        [DataMember(Name = "xy")]
+        [EnumMember(Value = "xy")]
         Xy,
         /// <summary>
         /// Color tempature.
         /// </summary>
-        [DataMember(Name = "ct")]
+        [EnumMember(Value = "ct")]
         ColorTempature
     }
 }
