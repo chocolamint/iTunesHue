@@ -15,6 +15,10 @@ namespace iTunesHue.Utilities
             return Task.WhenAll(tasks);
         }
 
+        public static Color ToDrawingColor(this System.Windows.Media.Color color)
+        {
+            return Color.FromArgb(color.R, color.G, color.B);
+        }
         public static System.Windows.Media.Color ToMediaColor(this Color color)
         {
             return System.Windows.Media.Color.FromRgb(color.R, color.G, color.B);
@@ -39,6 +43,10 @@ namespace iTunesHue.Utilities
         public static Xy ToXy(this Color color)
         {
             return Xy.FromColor(color);
+        }
+        public static Xy ToXy(this System.Windows.Media.Color color)
+        {
+            return ToXy(color.ToDrawingColor());
         }
     }
 }

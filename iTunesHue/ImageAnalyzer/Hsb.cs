@@ -68,6 +68,11 @@ namespace ImageAnalyzer
             return Math.Max(color.R, Math.Max(color.G, color.B)) / (float)byte.MaxValue;
         }
 
+        public static float GetLuminance(Color color)
+        {
+            return (float)(color.R * 0.298912 + color.G * 0.586611 + color.B * 0.114478);
+        }
+
         public Hsb AddBrightness(float brightness)
         {
             return new Hsb(Hue, Saturation, Brightness - brightness);
