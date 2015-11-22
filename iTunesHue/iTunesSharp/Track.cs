@@ -12,6 +12,8 @@ namespace iTunesSharp
 
         public string Name => _track.Name;
         public string Album => _track.Album;
+        public string Artist => _track.Artist;
+
         public ArtworkCollection Artwork { get; }
 
         public Track(IITTrack track)

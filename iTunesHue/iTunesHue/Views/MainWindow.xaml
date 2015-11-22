@@ -7,16 +7,17 @@
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
                 xmlns:vm="clr-namespace:iTunesHue.ViewModels"
+                xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
                 mc:Ignorable="d"
                 d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
                 ShowIconOnTitleBar="False"
                 Icon="{Binding Artwork.Value}"
-                IconBitmapScalingMode="HighQuality"
+                IconBitmapScalingMode="NearestNeighbor"
                 TitleCaps="False"
                 Title="iTunesHue" Height="350" Width="525">
 
     <mh:MetroWindow.TitleForeground>
-        <SolidColorBrush Color="{Binding SubColor.Value}" />
+        <SolidColorBrush Color="{Binding InvertedMainColor.Value}" />
     </mh:MetroWindow.TitleForeground>
     <mh:MetroWindow.NonActiveWindowTitleBrush>
         <SolidColorBrush Color="{Binding MainColor.Value}" />
@@ -28,11 +29,24 @@
         <SolidColorBrush Color="{Binding MainColor.Value}" />
     </mh:MetroWindow.GlowBrush>
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+    </Window.Resources>
+
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
             <l:DataContextDisposeAction />
         </i:EventTrigger>
+        <i:EventTrigger EventName="ContentRendered">
+            <l:LivetCallMethodAction MethodName="Initialize" MethodTarget="{Binding}" />
+        </i:EventTrigger>
     </i:Interaction.Triggers>
+
+    <VisualStateManager.VisualStateGroups>
+        <VisualStateGroup>
+            
+        </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -59,7 +73,75 @@
                 <SolidColorBrush Color="{Binding AccentColor.Value}" />
             </Border.Background>
         </Border>
-        <Image Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Source="{Binding Artwork.Value}" RenderOptions.BitmapScalingMode="HighQuality" />
+        <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseEnter">
+                    <ei:GoToStateAction StateName="MouseOver" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="MouseLeave">
+                    <ei:GoToStateAction StateName="Default" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="MouseOver">
+                        <Storyboard>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TrackInfo" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0.0">
+                                    <DiscreteObjectKeyFrame.Value>
+                                        <Visibility>Visible</Visibility>
+                                    </DiscreteObjectKeyFrame.Value>
+                                </DiscreteObjectKeyFrame>
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Default">
+                        <Storyboard>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TrackInfo" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0.0">
+                                    <DiscreteObjectKeyFrame.Value>
+                                        <Visibility>Collapsed</Visibility>
+                                    </DiscreteObjectKeyFrame.Value>
+                                </DiscreteObjectKeyFrame>
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            
+            <Image Grid.Row="0" Grid.RowSpan="2" x:Name="Artwork"
+               Source="{Binding Artwork.Value}" RenderOptions.BitmapScalingMode="HighQuality" />
+            
+            <Grid Grid.Row="0" x:Name="TrackInfo" Visibility="Collapsed" Opacity="0.9">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.Background>
+                    <SolidColorBrush Color="{Binding MainColor.Value}" />
+                </Grid.Background>
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground">
+                            <Setter.Value>
+                                <SolidColorBrush Color="{Binding InvertedMainColor.Value}" />
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Grid.Resources>
+                <TextBlock Grid.Row="0" Text="{Binding Title.Value}" FontSize="20" TextAlignment="Center" />
+                <TextBlock Grid.Row="1" Text="{Binding Artist.Value}" FontSize="14" TextAlignment="Center" />
+                <TextBlock Grid.Row="2" Text="{Binding Album.Value}" FontSize="14" TextAlignment="Center" />
+            </Grid>
+            
+        </Grid>
     </Grid>
 
 </mh:MetroWindow>
