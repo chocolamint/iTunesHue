@@ -22,13 +22,21 @@ namespace HueSharp.Converters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var collection = new LightCollection();
-            while (reader.Read())
+            while (true)
             {
-                var id = reader.Value;
+                // read json key.
+                reader.Read();
+                var id = (string)reader.Value;
+                // null is the end of json.
                 if (id == null) break;
+
+                // read json value.
                 reader.Read();
                 var light = serializer.Deserialize<Light>(reader);
-                light.Id = int.Parse((string)id);
+
+                // set light identifier.
+                light.Id = id;
+
                 collection.Add(light);
             }
             return collection;

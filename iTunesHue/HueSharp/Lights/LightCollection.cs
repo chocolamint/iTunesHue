@@ -10,9 +10,9 @@ namespace HueSharp.Lights
     /// </summary>
     [DataContract]
     [JsonConverter(typeof(LightCollectionConverter))]
-    public class LightCollection : KeyedCollection<int, Light>
+    public class LightCollection : KeyedCollection<string, Light>
     {
-        protected override int GetKeyForItem(Light item)
+        protected override string GetKeyForItem(Light item)
         {
             return item.Id;
         }

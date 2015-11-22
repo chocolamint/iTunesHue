@@ -1,4 +1,7 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Diagnostics;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace HueSharp.Lights
 {
@@ -6,12 +9,21 @@ namespace HueSharp.Lights
     /// Represents a hue light.
     /// </summary>
     [DataContract]
+    [DebuggerDisplay(@"\{ Light: {Id} - {Name} \}")]
     public class Light
     {
+        internal Func<string, object, Task> SetStateCallback { get; set; }
+        internal Func<Light, Task> GetStateCallback { get; set; }
+
+        internal Light()
+        {
+            
+        }
+
         /// <summary>
         /// Get Identifier of light.
         /// </summary>
-        public int Id { get; internal set; }
+        public string Id { get; internal set; }
         /// <summary>
         /// Get details the state of the light.
         /// </summary>
@@ -48,5 +60,20 @@ namespace HueSharp.Lights
         /// </summary>
         [DataMember(Name = "swversion")]
         public string SoftwareVersion { get; internal set; }
+
+
+        public Task SetXyAsync(Xy xy)
+        {
+            return SetStateCallback(Id, new {xy});
+        }
+        public Task SetXyAsync(float x, float y)
+        {
+            return SetXyAsync(new Xy(x, y));
+        }
+
+        public Task ReloadStateAsync()
+        {
+            return GetStateCallback(this);
+        }
     }
 }

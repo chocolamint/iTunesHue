@@ -1,0 +1,109 @@
+﻿<mahapps:MetroWindow x:Class="iTunesHue.Views.MainWindow"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
+                     mc:Ignorable="d"
+                     GlowBrush="{StaticResource AccentColorBrush}"
+                     TitleCaps="False"
+                     Title="iTunesHue" Height="350" Width="525">
+
+    <Grid Margin="10">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="256" />
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding R.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding R.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+            <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding G.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding G.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+            <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding B.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding B.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <Border Grid.Row="0" Grid.Column="3" Grid.RowSpan="3" Margin="10,0,0,0">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding Color.Value}" />
+                </Border.Background>
+            </Border>
+
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <TextBlock>
+                <Run Text="X:" />
+                <Run Text="{Binding X.Value}" />
+                <Run Text="Y:" />
+                <Run Text="{Binding Y.Value}" />
+            </TextBlock>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <TextBlock>
+                <Run Text="X:" />
+                <Run Text="{Binding LightX.Value}" />
+                <Run Text="Y:" />
+                <Run Text="{Binding LightY.Value}" />
+            </TextBlock>
+        </Grid>
+
+
+        <Grid Grid.Row="3">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="256" />
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding LightR.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding LightR.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+            <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding LightG.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding LightG.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+            <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding LightB.Value}" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding LightB.Value}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+            <Border Grid.Row="0" Grid.Column="3" Grid.RowSpan="3" Margin="10,0,0,0">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding LightColor.Value}" />
+                </Border.Background>
+            </Border>
+
+        </Grid>
+        
+    </Grid>
+</mahapps:MetroWindow>

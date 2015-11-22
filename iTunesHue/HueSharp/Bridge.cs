@@ -1,15 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HueSharp.Converters;
+using AutoMapper;
 using HueSharp.Lights;
-using Newtonsoft.Json.Serialization;
 
 namespace HueSharp
 {
@@ -29,6 +24,13 @@ namespace HueSharp
         /// Get bridge ip address.
         /// </summary>
         public IPAddress IPAddress { get; }
+
+        static Bridge()
+        {
+            Mapper.CreateMap<Light, Light>();
+            Mapper.CreateMap<Xy, Xy>();
+            Mapper.CreateMap<LightState, LightState>();
+        }
 
         /// <summary>
         /// Initialize new instance of <see cref="Bridge"/> class with bridge ip address.
@@ -58,20 +60,20 @@ namespace HueSharp
         {
             while (true)
             {
-                var json = JsonContent.Create(new
+                var content = JsonContent.Create(new
                 {
                     devicetype = deviceType
                 });
 
-                var response = await _client.PostAsync(_apiRoot, json, cancellationToken).ConfigureAwait(false);
+                var response = await _client.PostAsync(_apiRoot, content, cancellationToken).ConfigureAwait(false);
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                var jsonResults = (dynamic)JsonConvert.DeserializeObject(body);
-                var jsonResult = jsonResults[0];
+                var results = (dynamic)JsonConvert.DeserializeObject(body);
+                var result = results[0];
 
-                if (jsonResult.success != null)
+                if (result.success != null)
                 {
-                    UserName = jsonResult.success.username;
+                    UserName = result.success.username;
                     return;
                 }
 
@@ -88,10 +90,35 @@ namespace HueSharp
         /// <returns>List of all lights that have been discovered by the bridge.</returns>
         public async Task<LightCollection> GetLightsAsync(CancellationToken cancellationToken)
         {
-            var response = await _client.GetAsync($"{_apiRoot}/{UserName}/lights", cancellationToken).ConfigureAwait(false);
-            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var lights = await GetAsync<LightCollection>("lights", cancellationToken).ConfigureAwait(false);
+            foreach (var light in lights)
+            {
+                light.SetStateCallback = SetLightStateAsync;
+                light.GetStateCallback = GetLightStateAsync;
+            }
+            return lights;
+        }
 
-            return JsonConvert.DeserializeObject<LightCollection>(json);
+        internal async Task SetLightStateAsync(string id, object state)
+        {
+            object api = $"lights/{id}/state";
+            var content = JsonContent.Create(state);
+            var response = await _client.PutAsync($"{_apiRoot}/{UserName}/{api}", content);
+        }
+
+        internal async Task GetLightStateAsync(Light light)
+        {
+            //TODO
+            var newLight = await GetAsync<Light>($"lights/{light.Id}", CancellationToken.None);
+            light.State.Xy = newLight.State.Xy;
+            light.State.Brightness = newLight.State.Brightness;
+        } 
+
+        private async Task<T> GetAsync<T>(string api, CancellationToken cancellationToken)
+        {
+            var response = await _client.GetAsync($"{_apiRoot}/{UserName}/{api}", cancellationToken).ConfigureAwait(false);
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

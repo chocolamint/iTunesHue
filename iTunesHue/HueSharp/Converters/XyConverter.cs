@@ -16,7 +16,11 @@ namespace HueSharp.Converters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotSupportedException();
+            var xy = (Xy)value;
+            writer.WriteStartArray();
+            writer.WriteValue(xy.X);
+            writer.WriteValue(xy.Y);
+            writer.WriteEndArray();
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
