@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,11 +12,33 @@ namespace ImageAnalyzer
     {
         public static Tuple<Color, Color, Color> GetColors(Bitmap bitmap)
         {
-            var baseColor = FindMainColor(bitmap);
-            var accentColor = FindAccentColor(bitmap, baseColor);
-            var subColorX = FindSubColor(bitmap, baseColor, accentColor);
+            // TODO: Dispose ‚ÍŒÄ‚Ño‚µŒ³‚ª‚·‚é‚×‚«B‚Æ‚¢‚¤‚© System.Drawing Žg‚í‚È‚¢‚æ‚¤‚É‚µ‚½‚¢
+            try
+            {
+                if (bitmap.Width > 400)
+                {
+                    var resized = new Bitmap(400, (int)(bitmap.Height * 400.0 / bitmap.Width));
 
-            return Tuple.Create(baseColor, accentColor, subColorX);
+                    using (var g = Graphics.FromImage(resized))
+                    {
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(bitmap, 0, 0, resized.Width, resized.Height);
+                    }
+
+                    bitmap.Dispose();
+                    bitmap = resized;
+                }
+
+                var baseColor = FindMainColor(bitmap);
+                var accentColor = FindAccentColor(bitmap, baseColor);
+                var subColorX = FindSubColor(bitmap, baseColor, accentColor);
+
+                return Tuple.Create(baseColor, accentColor, subColorX);
+            }
+            finally
+            {
+                bitmap.Dispose();
+            }
         }
         private static Color FindMainColor(Bitmap bitmap)
         {
