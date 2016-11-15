@@ -15,14 +15,19 @@ namespace ImageAnalyzer
             // TODO: Dispose ‚ÍŒÄ‚Ño‚µŒ³‚ª‚·‚é‚×‚«B‚Æ‚¢‚¤‚© System.Drawing Žg‚í‚È‚¢‚æ‚¤‚É‚µ‚½‚¢
             try
             {
-                if (bitmap.Width > 400)
+                var originalWidth = bitmap.Width;
+                var originalHeight = bitmap.Height;
+
+                var resizedWidth = 240;
+                if (originalWidth > resizedWidth)
                 {
-                    var resized = new Bitmap(400, (int)(bitmap.Height * 400.0 / bitmap.Width));
+                    var resizedHeight = originalHeight * resizedWidth / originalWidth;
+                    var resized = new Bitmap(resizedWidth, resizedHeight);
 
                     using (var g = Graphics.FromImage(resized))
                     {
                         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        g.DrawImage(bitmap, 0, 0, resized.Width, resized.Height);
+                        g.DrawImage(bitmap, 0, 0, resizedWidth, resizedHeight);
                     }
 
                     bitmap.Dispose();
